@@ -4,11 +4,13 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: nodejs18.x
-  profile: krisperssonRegularUser
+  profile: ${env:PROFILE}
   region: eu-north-1
-  deploymentMethod: direct
   iam:
-      role: arn:aws:iam::619468094687:role/LambdaAPIGatewayDynamoDB
+      role: ${env:LAMBDA_ROLE}
+  deploymentMethod: direct
+
+useDotenv: true
 
 plugins:
   - serverless-webpack
