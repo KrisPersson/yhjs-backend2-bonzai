@@ -1,0 +1,57 @@
+service: bonzai
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  profile: krisperssonRegularUser
+  region: eu-north-1
+  deploymentMethod: direct
+  iam:
+      role: arn:aws:iam::619468094687:role/LambdaAPIGatewayDynamoDB
+
+plugins:
+  - serverless-webpack
+
+package:
+  individually: true
+
+functions:
+  getBookings:
+    handler: functions/getBookings/index.handler
+    events:
+    - httpApi:
+        path: '/api/booking'
+        method: GET
+  postBooking:
+    handler: functions/postBooking/index.handler
+    events:
+    - httpApi:
+        path: '/api/booking'
+        method: POST
+  updateBooking:
+    handler: functions/updateBooking/index.handler
+    events:
+    - httpApi:
+        path: '/api/booking'
+        method: PUT
+  deleteBooking:
+    handler: functions/deleteBooking/index.handler
+    events:
+    - httpApi:
+        path: '/api/booking'
+        method: DELETE
+
+resources:
+    Resources: 
+        roomsDb:
+            Type: AWS::DynamoDB::Table
+            Properties: 
+                TableName: rooms-db
+                AttributeDefinitions:
+                    - AttributeName: bookingNr
+                      AttributeType: S
+                KeySchema:
+                    - AttributeName: bookingNr
+                      KeyType: HASH
+                BillingMode: PAY_PER_REQUEST
