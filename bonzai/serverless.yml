@@ -49,11 +49,11 @@ resources:
         roomsDb:
             Type: AWS::DynamoDB::Table
             Properties: 
-                TableName: rooms-db
+                TableName: rooms
                 AttributeDefinitions:
-                    - AttributeName: bookingNr
+                    - AttributeName: id
                       AttributeType: S
                 KeySchema:
-                    - AttributeName: bookingNr
+                    - AttributeName: id
                       KeyType: HASH
                 BillingMode: PAY_PER_REQUEST

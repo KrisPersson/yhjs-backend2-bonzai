@@ -1,17 +1,79 @@
 const { sendResponse } = require('../../responses/index')
 const { db } = require('../../services/db')
 const { v4: uuidv4 } = require('uuid');
+const { pickRoomNumbers, getUnavailableRoomNumbersForDate, dateDiff } = require('../../utils')
+const moment = require('moment')
 
-//// NEEEEEEJ
 
 async function postBooking(body) {
-    const { task } = body
-    const item = { id: uuidv4(), task: task, done: false}
-    await db.put({
-        TableName: 'todos-db',
-        Item: {...item}
-      }).promise()
-    return sendResponse(200, { success: true, message: 'Booking created!', booking: {...item} })
+    const { bookingGuests, roomTypes, checkIn, checkOut, customer } = body
+
+    const requestedBeds = roomTypes.reduce((acc, cur) => {
+        if (cur === "enkel") {
+            return acc + 1
+        } else if (cur === "dubbel") {
+            return acc + 2
+        } else if (cur === "svit") {
+            return acc + 3
+        } else {
+            return acc + 0
+        }
+    }, 0)
+
+    if (bookingGuests > requestedBeds) {
+        return sendResponse(200, {success: false, message: 'More guests than allowed based on requested rooms'})
+    }
+
+    const allBookedRoomsFromDb = await db.scan({
+        TableName: 'rooms'
+    }).promise()
+
+    const dateCheckIn = new Date(checkIn)
+    const dateCheckOut = new Date(checkOut)
+    const requestedNights = dateDiff(dateCheckIn, dateCheckOut)
+
+    const newBookedRooms = []
+    const bookingNr = uuidv4()
+
+    for (let i = 0; i < requestedNights; i++) {
+        const currentDate = new Date(checkIn)
+        currentDate.setDate(currentDate.getDate() + i)
+
+        const unavailableRooms = getUnavailableRoomNumbersForDate(allBookedRoomsFromDb.Items, currentDate.toLocaleDateString())
+
+        if (unavailableRooms.length >= 20) {
+            return sendResponse(200, { success: false, message: `${currentDate} is already fully booked` })
+        } else if (unavailableRooms.length + roomTypes.length > 20) {
+            return sendResponse(200, { success: false, message: `${currentDate} has less than ${roomTypes.length} rooms available` })
+        }
+        const chosenRoomNumbers = pickRoomNumbers(unavailableRooms, roomTypes.length)
+
+        roomTypes.forEach((room, i) => {
+
+            newBookedRooms.push({
+                id: uuidv4(),
+                bookingNr: bookingNr,
+                date: moment(currentDate).format("YYYY/MM/DD"),
+                roomNumber: chosenRoomNumbers[i],
+                roomType: room,
+                customer: {...customer},
+                bookingGuests: bookingGuests,
+                price: room === 'enkel' ? 500 : room === 'dubbel' ? 1000 : 1500
+            })
+        })
+    }
+
+    const newBookedRoomsInRequestFormat = newBookedRooms.map(item => {
+        return { PutRequest: { Item: {...item}} }
+    })
+
+    await db.batchWrite({
+        RequestItems: {
+            "rooms": [...newBookedRoomsInRequestFormat]
+      }
+    } ).promise()
+
+    return sendResponse(200, { success: true, message: 'Booking created!', roomsBooked: newBookedRooms })
 }
 
 module.exports.handler = async (event) => {
@@ -20,7 +82,5 @@ module.exports.handler = async (event) => {
         return await postBooking(JSON.parse(event.body))
     } catch (error) {
         return sendResponse(400, error.message)
-    }
+    }   
 };
-
-
