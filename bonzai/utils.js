@@ -27,4 +27,18 @@ function pickRoomNumbers(unavailableRooms, requestedAmtRooms) {
     return pickedNumbers
 }
 
-module.exports = { dateDiff, getUnavailableRoomNumbersForDate, pickRoomNumbers }
+function calcAmtRequestedBeds(roomTypes) {
+    return roomTypes.reduce((acc, cur) => {
+        if (cur === "enkel") {
+            return acc + 1
+        } else if (cur === "dubbel") {
+            return acc + 2
+        } else if (cur === "svit") {
+            return acc + 3
+        } else {
+            return acc + 0
+        }
+    }, 0)
+}
+
+module.exports = { dateDiff, getUnavailableRoomNumbersForDate, pickRoomNumbers, calcAmtRequestedBeds }

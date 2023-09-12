@@ -1,24 +1,14 @@
 const { sendResponse } = require('../../responses/index')
 const { db } = require('../../services/db')
-const { v4: uuidv4 } = require('uuid');
-const { pickRoomNumbers, getUnavailableRoomNumbersForDate, dateDiff } = require('../../utils')
+const { v4: uuidv4 } = require('uuid')
+const { pickRoomNumbers, getUnavailableRoomNumbersForDate, dateDiff, calcAmtRequestedBeds } = require('../../utils')
 const moment = require('moment')
 
 
 async function postBooking(body) {
     const { bookingGuests, roomTypes, checkIn, checkOut, customer } = body
 
-    const requestedBeds = roomTypes.reduce((acc, cur) => {
-        if (cur === "enkel") {
-            return acc + 1
-        } else if (cur === "dubbel") {
-            return acc + 2
-        } else if (cur === "svit") {
-            return acc + 3
-        } else {
-            return acc + 0
-        }
-    }, 0)
+    const requestedBeds = calcAmtRequestedBeds(roomTypes)
 
     if (bookingGuests > requestedBeds) {
         return sendResponse(200, {success: false, message: 'More guests than allowed based on requested rooms'})
