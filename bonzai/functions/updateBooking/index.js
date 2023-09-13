@@ -5,6 +5,7 @@ const moment = require('moment')
 const { v4: uuidv4 } = require('uuid')
 
 async function updateBooking(body) {
+
   const { bookingNr, bookingGuests, roomTypes, checkIn, checkOut } = body
   const requestedBeds = calcAmtRequestedBeds(roomTypes)
 
@@ -42,7 +43,6 @@ async function updateBooking(body) {
 
   }, ''))
 
-  const bookedCheckInDate = new Date(currentEarliestDate.toLocaleDateString()) 
   const newRequestedCheckInDate = new Date(checkIn)
   const bookedCheckOutDate = new Date(currentLatestDate.toLocaleDateString())
   bookedCheckOutDate.setDate(bookedCheckOutDate.getDate() + 1)
@@ -98,19 +98,8 @@ async function updateBooking(body) {
     }
   } ).promise()
 
-  // await db.update({
-  //   TableName: 'rooms',
-  //   Key: { bookingNr },
-  //   ReturnValues: 'ALL_NEW',
-  //   UpdateExpression: 'set done = :done',
-  //   ExpressionAttributeValues: {
-  //     ':done': done
-  //   }
-  // }).promise()
-
   return sendResponse(200, { success: true, newBookedRooms })
 }
-
 
 module.exports.handler = async (event) => {
     console.log(event)
