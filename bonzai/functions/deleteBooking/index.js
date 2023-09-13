@@ -4,7 +4,7 @@ const { db } = require('../../services/db')
 async function deleteBooking(body) {
     const { bookingNr } = body
     await db.delete({
-        TableName: 'rooms-db',
+        TableName: 'rooms',
         Key: {
             bookingNr: bookingNr
         }
