@@ -13,7 +13,8 @@
     "aws-sdk": "^2.1454.0",
     "dotenv": "^16.3.1",
     "moment": "^2.29.4",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "validator": "^13.11.0"
   },
   "devDependencies": {
     "serverless-webpack": "^5.13.0"
