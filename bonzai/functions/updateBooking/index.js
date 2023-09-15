@@ -1,6 +1,6 @@
 const { sendResponse } = require('../../responses/index')
 const { db } = require('../../services/db')
-const { pickRoomNumbers, getUnavailableRoomNumbersForDate, dateDiff, calcAmtRequestedBeds } = require('../../utils')
+const { pickRoomNumbers, getUnavailableRoomNumbersForDate, dateDiff, calcAmtRequestedBeds, calcTotalPrice } = require('../../utils')
 const moment = require('moment')
 const { v4: uuidv4 } = require('uuid')
 
@@ -98,7 +98,17 @@ async function updateBooking(body) {
     }
   } ).promise()
 
-  return sendResponse(200, { success: true, newBookedRooms })
+  const response = {
+    bookingNr,
+    numberOfGuests: bookingGuests,
+    numberOfRooms: roomTypes.length,
+    priceTotal: calcTotalPrice(roomTypes) * requestedNights,
+    checkInDate: moment(newRequestedCheckInDate).format("YYYY-MM-DD"),
+    checkOutDate: moment(newRequestedCheckOutDate).format("YYYY-MM-DD"),
+    customerName: customer.name
+}
+
+  return sendResponse(200, { success: true, updatedConfirmationInfo: {...response} })
 }
 
 module.exports.handler = async (event) => {

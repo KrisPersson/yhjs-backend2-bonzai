@@ -41,4 +41,16 @@ function calcAmtRequestedBeds(roomTypes) {
     }, 0)
 }
 
-module.exports = { dateDiff, getUnavailableRoomNumbersForDate, pickRoomNumbers, calcAmtRequestedBeds }
+function calcTotalPrice(roomTypes) {
+    return roomTypes.reduce((acc, cur) => {
+        if (cur === "enkel") {
+            return acc + 500
+        } else if (cur === "dubbel") {
+            return acc + 1000
+        } else {
+            return acc + 1500
+        }
+    }, 0)
+}
+
+module.exports = { dateDiff, getUnavailableRoomNumbersForDate, pickRoomNumbers, calcAmtRequestedBeds, calcTotalPrice }

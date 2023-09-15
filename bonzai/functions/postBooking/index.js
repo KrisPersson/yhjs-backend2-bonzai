@@ -1,7 +1,7 @@
 const { sendResponse } = require('../../responses/index')
 const { db } = require('../../services/db')
 const { v4: uuidv4 } = require('uuid')
-const { pickRoomNumbers, getUnavailableRoomNumbersForDate, dateDiff, calcAmtRequestedBeds } = require('../../utils')
+const { pickRoomNumbers, getUnavailableRoomNumbersForDate, dateDiff, calcAmtRequestedBeds, calcTotalPrice } = require('../../utils')
 const moment = require('moment')
 
 
@@ -63,7 +63,21 @@ async function postBooking(body) {
       }
     } ).promise()
 
-    return sendResponse(200, { success: true, message: 'Booking created!', roomsBooked: newBookedRooms })
+    const response = {
+        bookingNr,
+        numberOfGuests: bookingGuests,
+        numberOfRooms: roomTypes.length,
+        priceTotal: calcTotalPrice(roomTypes) * requestedNights,
+        checkInDate: moment(dateCheckIn).format("YYYY-MM-DD"),
+        checkOutDate: moment(dateCheckOut).format("YYYY-MM-DD"),
+        customerName: customer.name
+    }
+
+    return sendResponse(200, { 
+        success: true, 
+        message: 'Booking created!', 
+        confirmationInfo: {...response} 
+    })
 }
 
 module.exports.handler = async (event) => {
