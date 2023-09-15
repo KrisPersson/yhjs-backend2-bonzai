@@ -10,6 +10,7 @@ async function deleteBooking(body) {
     }).promise()
 
     const bookingToDelete = Items.filter(item => item.bookingNr === bookingNr)
+    if (bookingToDelete.length < 1) return sendResponse(404, { success: false, message: 'No booking with provided booking number could be found' } )
     const dateArr = []
     const diffArr = []
     const cancelDate = moment().format('YYYY-MM-DD')
@@ -17,14 +18,12 @@ async function deleteBooking(body) {
         const datesInBooking = moment(item.date).format('YYYY-MM-DD')
         dateArr.push(datesInBooking)
     })
-    console.log(dateArr)
     dateArr.map((item) => {
         const checkDiff = moment(item).diff(cancelDate, 'days')
         if (checkDiff < 2) {
             diffArr.push(checkDiff)
         }
     })
-    console.log(diffArr)
     
     if (diffArr.length > 0) {
         return sendResponse(200, {success: false, message: 'less than two days until checkin'})
@@ -38,7 +37,7 @@ async function deleteBooking(body) {
             }
         }).promise()
     ))
-    return sendResponse(200, { success: true })
+    return sendResponse(200, { success: true, message: 'Booking successfully deleted' })
 }
 
 module.exports.handler = async (event) => {

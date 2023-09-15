@@ -19,7 +19,6 @@ async function getBookings() {
     })
 
     for (const booking in bookings) {
-        console.log(booking[0])
 
         let parsedBooking = {
             bookingNr: bookings[booking][0].bookingNr,

@@ -32,9 +32,9 @@ async function postBooking(body) {
         const unavailableRooms = getUnavailableRoomNumbersForDate(allBookedRoomsFromDb.Items, currentDate.toLocaleDateString())
 
         if (unavailableRooms.length >= 20) {
-            return sendResponse(200, { success: false, message: `${currentDate} is already fully booked` })
+            return sendResponse(200, { success: false, message: `${moment(currentDate).format("YYYY-MM-DD")} is already fully booked` })
         } else if (unavailableRooms.length + roomTypes.length > 20) {
-            return sendResponse(200, { success: false, message: `${currentDate} has less than ${roomTypes.length} rooms available` })
+            return sendResponse(200, { success: false, message: `${moment(currentDate).format("YYYY-MM-DD")} has less than ${roomTypes.length} rooms available` })
         }
         const chosenRoomNumbers = pickRoomNumbers(unavailableRooms, roomTypes.length)
 
