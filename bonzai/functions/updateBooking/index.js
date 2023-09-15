@@ -3,6 +3,7 @@ const { db } = require('../../services/db')
 const { pickRoomNumbers, getUnavailableRoomNumbersForDate, dateDiff, calcAmtRequestedBeds, calcTotalPrice } = require('../../utils')
 const moment = require('moment')
 const { v4: uuidv4 } = require('uuid')
+const { validateUpdateBody } = require('../../middleware/index')
 
 async function updateBooking(body) {
 
@@ -112,11 +113,12 @@ async function updateBooking(body) {
 }
 
 module.exports.handler = async (event) => {
-    console.log(event)
-    try {
-        return await updateBooking(JSON.parse(event.body))
-        
-    } catch (error) {
-        return sendResponse(400, error.message)
-    }
+  console.log(event)
+  try {
+    validateUpdateBody(JSON.parse(event.body))
+    return await updateBooking(JSON.parse(event.body))
+      
+  } catch (error) {
+      return sendResponse(400, error.message)
+  }
 }
