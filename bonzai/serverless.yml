@@ -7,7 +7,7 @@ provider:
   profile: ${env:PROFILE}
   region: eu-north-1
   iam:
-      role: ${env:LAMBDA_ROLE}
+    role: ${env:LAMBDA_ROLE}
   deploymentMethod: direct
 
 useDotenv: true
@@ -49,11 +49,11 @@ resources:
         roomsDb:
             Type: AWS::DynamoDB::Table
             Properties: 
-                TableName: rooms-db
+                TableName: rooms
                 AttributeDefinitions:
-                    - AttributeName: bookingNr
-                      AttributeType: S
+                    - AttributeName: id
+                      AttributeType: S  
                 KeySchema:
-                    - AttributeName: bookingNr
-                      KeyType: HASH
+                    - AttributeName: id
+                      KeyType: HASH  
                 BillingMode: PAY_PER_REQUEST

@@ -12,7 +12,8 @@
   "dependencies": {
     "aws-sdk": "^2.1454.0",
     "dotenv": "^16.3.1",
-    "uuid": "^9.0.0"
+    "moment": "^2.29.4",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "serverless-webpack": "^5.13.0"
