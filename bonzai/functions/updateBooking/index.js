@@ -69,7 +69,7 @@ async function updateBooking(body) {
       newBookedRooms.push({
           id: uuidv4(),
           bookingNr: bookingNr,
-          date: moment(currentDate).format("YYYY/MM/DD"),
+          date: moment(currentDate).format("YYYY-MM-DD"),
           roomNumber: chosenRoomNumbers[i],
           roomType: room,
           customer: {...customer},
