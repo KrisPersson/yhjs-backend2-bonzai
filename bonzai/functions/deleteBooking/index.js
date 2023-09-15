@@ -12,9 +12,9 @@ async function deleteBooking(body) {
     const bookingToDelete = Items.filter(item => item.bookingNr === bookingNr)
     const dateArr = []
     const diffArr = []
-    const cancelDate = moment().format('YYYY/MM/DD')
+    const cancelDate = moment().format('YYYY-MM-DD')
     bookingToDelete.map((item) => {
-        const datesInBooking = moment(item.date).format('YYYY/MM/DD')
+        const datesInBooking = moment(item.date).format('YYYY-MM-DD')
         dateArr.push(datesInBooking)
     })
     console.log(dateArr)
