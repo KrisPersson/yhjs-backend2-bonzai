@@ -67,7 +67,7 @@ async function postBooking(body) {
         bookingNr,
         numberOfGuests: bookingGuests,
         numberOfRooms: roomTypes.length,
-        priceTotal: calcTotalPrice(roomTypes),
+        priceTotal: calcTotalPrice(roomTypes) * requestedNights,
         checkInDate: moment(dateCheckIn).format("YYYY-MM-DD"),
         checkOutDate: moment(dateCheckOut).format("YYYY-MM-DD"),
         customerName: customer.name
