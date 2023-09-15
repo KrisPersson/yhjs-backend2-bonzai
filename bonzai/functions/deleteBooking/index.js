@@ -1,6 +1,7 @@
 const { sendResponse } = require('../../responses/index')
 const { db } = require('../../services/db')
 const moment = require('moment')
+const { validateDeleteBody } = require('../../middleware/index')
 
 async function deleteBooking(body) {
     const { bookingNr } = body
@@ -43,8 +44,8 @@ async function deleteBooking(body) {
 module.exports.handler = async (event) => {
     console.log(event)
     try {
+        validateDeleteBody(JSON.parse(event.body))
         return await deleteBooking(JSON.parse(event.body))
-        
     } catch (error) {
         return sendResponse(400, error.message)
     }

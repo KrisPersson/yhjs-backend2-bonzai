@@ -2,6 +2,7 @@ const { sendResponse } = require('../../responses/index')
 const { db } = require('../../services/db')
 const { v4: uuidv4 } = require('uuid')
 const { pickRoomNumbers, getUnavailableRoomNumbersForDate, dateDiff, calcAmtRequestedBeds, calcTotalPrice } = require('../../utils')
+const { validatePostBody } = require('../../middleware/index')
 const moment = require('moment')
 
 
@@ -83,6 +84,7 @@ async function postBooking(body) {
 module.exports.handler = async (event) => {
     console.log(event)
     try {
+        validatePostBody(JSON.parse(event.body))
         return await postBooking(JSON.parse(event.body))
     } catch (error) {
         return sendResponse(400, error.message)
