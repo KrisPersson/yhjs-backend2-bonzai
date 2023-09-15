@@ -1,47 +1,50 @@
 const { sendResponse } = require('../../responses/index')
 const { db } = require('../../services/db')
+const { dateDiff } = require('../../utils')
+const moment = require('moment')
 
 async function getBookings() {
     const { Items } = await db.scan({
         TableName: 'rooms'
     }).promise()
 
-    let datesArray = [], filteredBookingArray = [], filtered = [], bookingGuests, bookingName, bookedRooms = 0;
+    let bookings = {}
+    let parsedBookings = []
 
-    // Plockar ut alla bokningsnummer, och plockar ut datum ur databassvaret och "styckar upp" dem i checkIn och checkOut.
-    for (const element of Items) {
-        filtered = Items.filter((item) => {
-            return item.bookingNr === element.bookingNr;
-        });
+    Items.forEach(item => {
+        if (!bookings.hasOwnProperty(item.bookingNr)) {
+            bookings[item.bookingNr] = []
+        }
+        bookings[item.bookingNr].push(item)
+    })
 
-        for (const item of filtered) {
-            datesArray.push(item.date);
-            bookingGuests = item.bookingGuests;
-            bookedRooms += 1;
-            bookingName = item.customer.name
+    for (const booking in bookings) {
+        console.log(booking[0])
+
+        let parsedBooking = {
+            bookingNr: bookings[booking][0].bookingNr,
+            checkIn: '',
+            checkOut: '',
+            numberOfGuests: bookings[booking][0].bookingGuests,
+            numberOfRooms: 0,
+            customerName: bookings[booking][0].customer.name
         }
 
-        // "Fullösning" - Av någon anledning jag inte orkade undersöka så dubbleras bookedRooms till de dubbla, så jag halverar helt sonika värdet
-        bookedRooms /= 2;
+        bookings[booking].forEach(item => {
+            if (!parsedBooking.bookingNr) parsedBooking.checkIn = item.bookingNr 
+            parsedBooking.checkIn = !parsedBooking.checkIn ? item.date : !moment(new Date(item.date)).isAfter(new Date(parsedBooking.checkIn)) ? item.date : parsedBooking.checkIn
+            parsedBooking.checkOut = !parsedBooking.checkOut ? item.date : moment(new Date(item.date)).isAfter(new Date(parsedBooking.checkOut)) ? item.date : parsedBooking.checkOut
+        })
 
-        // Sorterar datumen i rätt ordning och sätter checkIn till första värdet i arrayen och checkOut till sista värdet i arrayen
-        datesArray.sort();
-        let checkIn = datesArray[0];
-        let checkOut = datesArray[datesArray.length - 1]
+        parsedBooking.checkOut = moment(parsedBooking.checkOut).add(1, 'day').format("YYYY-MM-DD")
 
-        // Den array som skickas tillbaka till frontend
-        filteredBookingArray.push({ bookingNr: element.bookingNr, checkIn: checkIn, checkOut: checkOut, bookedGuests: bookingGuests, bookedRooms: bookedRooms, bookingName: bookingName })
-
-        datesArray = [];
-        bookedRooms = 0;
+        const numberOfNights = dateDiff(new Date(parsedBooking.checkIn), new Date(parsedBooking.checkOut))
+        const numberOfItems = bookings[booking].length
+        parsedBooking.numberOfRooms = numberOfItems / numberOfNights
+        parsedBookings.push({...parsedBooking})
     }
 
-    // Filtrerar ut alla "rumsdubbletter" och pushar till filteredBookingArray.
-    filteredBookingArray = filteredBookingArray.filter((obj, index) => {
-        return index === filteredBookingArray.findIndex(o => obj.bookingNr === o.bookingNr);
-    });
-
-    return sendResponse(200, { success: true, message: 'Booked rooms', bookings: filteredBookingArray })
+    return sendResponse(200, { success: true, bookings: [...parsedBookings] })
 }
 
 module.exports.handler = async (event) => {
@@ -51,4 +54,4 @@ module.exports.handler = async (event) => {
     } catch (error) {
         return sendResponse(400, error.message)
     }
-};
+}
