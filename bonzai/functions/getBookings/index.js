@@ -30,7 +30,6 @@ async function getBookings() {
         }
 
         bookings[booking].forEach(item => {
-            if (!parsedBooking.bookingNr) parsedBooking.checkIn = item.bookingNr 
             parsedBooking.checkIn = !parsedBooking.checkIn ? item.date : !moment(new Date(item.date)).isAfter(new Date(parsedBooking.checkIn)) ? item.date : parsedBooking.checkIn
             parsedBooking.checkOut = !parsedBooking.checkOut ? item.date : moment(new Date(item.date)).isAfter(new Date(parsedBooking.checkOut)) ? item.date : parsedBooking.checkOut
         })
